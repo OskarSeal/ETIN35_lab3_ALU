@@ -1,0 +1,21 @@
+# Vivado generated files
+.Xil/
+*.jou
+*.log
+*.str
+*.pb
+*.wdb
+*.cache/
+*.hw/
+*.ip_user_files/
+*.runs/
+*.sim/
+*.gen/
+*.srcs/
+*.xpr
+
+# Simulation output
+*.vvp
+*.vcd
+
+.DS_Store
