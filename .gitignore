@@ -15,6 +15,7 @@
 *.xpr
 
 # Simulation output
+xsim.dir/
 *.vvp
 *.vcd
 

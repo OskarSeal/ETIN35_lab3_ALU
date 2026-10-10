@@ -1,0 +1,10 @@
+{
+    "verilog.linting.linter": "xvlog",
+    "verilog.linting.path": "D:/Program/2026.1/Vivado/bin/",
+    "terminal.integrated.env.windows": {
+        "PATH": "D:\\Program\\2026.1\\Vivado\\bin;${env:PATH}"
+    },
+    "files.associations": {
+        "*.xdc": "tcl"
+    }
+}

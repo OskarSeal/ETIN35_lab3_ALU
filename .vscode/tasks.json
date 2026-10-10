@@ -1,0 +1,34 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "xsim: run testbench",
+            "type": "shell",
+            "options": {
+                "shell": { "executable": "powershell.exe", "args": ["-NoProfile", "-Command"] },
+                "env": { "PATH": "D:\\Program\\2026.1\\Vivado\\bin;${env:PATH}" }
+            },
+            "command": "$src = @('alu_common.sv') + (Get-ChildItem *.sv -Exclude alu_common.sv).Name; xvlog --sv $src; if ($LASTEXITCODE -eq 0) { xelab ${input:tb} -debug typical -R }",
+            "problemMatcher": [],
+            "group": { "kind": "test", "isDefault": true }
+        },
+        {
+            "label": "xsim: open waveform GUI",
+            "type": "shell",
+            "options": {
+                "shell": { "executable": "powershell.exe", "args": ["-NoProfile", "-Command"] },
+                "env": { "PATH": "D:\\Program\\2026.1\\Vivado\\bin;${env:PATH}" }
+            },
+            "command": "$src = @('alu_common.sv') + (Get-ChildItem *.sv -Exclude alu_common.sv).Name; xvlog --sv $src; if ($LASTEXITCODE -eq 0) { xelab ${input:tb} -debug typical -s ${input:tb}_sim; xsim ${input:tb}_sim -gui }",
+            "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        {
+            "id": "tb",
+            "type": "pickString",
+            "description": "Testbench top module",
+            "options": ["tb_alu", "tb_alu_ctrl", "tb_alu_top", "tb_binary2bcd"]
+        }
+    ]
+}
