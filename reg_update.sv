@@ -12,34 +12,17 @@ module reg_update (
     output logic [7:0] b
     );
 
-    logic [7:0] a_next, b_next;
-
-    always_comb begin : next_state
-        a_next = a;
-        b_next = b;
-        case (reg_ctrl)
-            2'b01:   a_next = reg_input;
-            2'b10:   b_next = reg_input;
-            default: ;
-        endcase
+    always_ff @( posedge clk or posedge rst ) begin : registers
+        if (rst) begin
+            a <= '0;
+            b <= '0;
+        end else begin
+            case (reg_ctrl)
+                2'b01:   a <= reg_input;
+                2'b10:   b <= reg_input;
+                default: ;
+            endcase
+        end
     end
-
-    dff #(
-        .W(8)
-        ) reg_a (
-        .clk(clk),
-        .rst(rst),
-        .d(a_next),
-        .q(a)
-        );
-
-    dff #(
-        .W(8)
-        ) reg_b (
-        .clk(clk),
-        .rst(rst),
-        .d(b_next),
-        .q(b)
-        );
 
 endmodule

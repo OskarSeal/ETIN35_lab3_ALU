@@ -262,6 +262,23 @@ module tb_alu ();
         #(PERIOD/2)
         check_correct(result, 128, 0, 1, a, b, fn, overflow, sign, `__LINE__);
 
+        // Mod 3 for every a, unsigned and signed (signed result is always 0..2)
+        for (int i = 0; i < 256; i++) begin
+            int a_signed;
+
+            #(PERIOD/2)
+
+            a = i;
+            a_signed = $signed(a);
+            fn = U_MOD3;
+            #(PERIOD/2)
+            check_correct(result, i % 3, 0, 0, a, b, fn, overflow, sign, `__LINE__);
+
+            fn = S_MOD3;
+            #(PERIOD/2)
+            check_correct(result, (a_signed % 3 + 3) % 3, 0, 0, a, b, fn, overflow, sign, `__LINE__);
+        end
+
         // Fill out with more test cases if you want, to make sure you cover all corner cases!
         // Make sure you use blocking operators, and wait slightly before checking so that all signals can change
         // a = ...

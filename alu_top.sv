@@ -8,13 +8,20 @@ module alu_top (
     input logic b_enter,
     input logic b_sign,
     input logic [7:0] alu_input,
+    input logic use_keyboard,   // SW15: 1 = operands typed on the PS/2 keyboard
+    input logic kb_clk,
+    input logic kb_data,
     output logic [6:0] seven_seg,
     output logic [3:0] anode
     );
 
     // SIGNAL DEFINITIONS
     logic reset;                // active-high reset used by every module
-    logic enter, sign;          // debounced buttons
+    logic enter_button, sign;   // debounced buttons
+    logic kb_enter;             // Enter key, one-cycle pulse
+    logic enter;                // BTNC or the Enter key
+    logic [7:0] kb_number;      // number typed on the keyboard
+    logic [7:0] operand;        // value loaded into reg A or B
     alu_op_t fn;
     logic [1:0] reg_ctrl;
     logic [7:0] a, b;
@@ -30,7 +37,7 @@ module alu_top (
         .clk(clk),
         .rst(reset),
         .button_in(b_enter),
-        .button_out(enter)
+        .button_out(enter_button)
         );
 
     debouncer debouncer_sign (
@@ -39,6 +46,21 @@ module alu_top (
         .button_in(b_sign),
         .button_out(sign)
         );
+
+    // Operands typed on a PS/2 keyboard, using the lab 2 receiver. The number
+    // is cleared on every Enter, so B is typed from scratch once A is latched.
+    keyboard_input keyboard_input_inst (
+        .clk(clk),
+        .rst(reset),
+        .kb_clk(kb_clk),
+        .kb_data(kb_data),
+        .clear(enter),
+        .number(kb_number),
+        .enter(kb_enter)
+        );
+
+    assign enter   = enter_button | kb_enter;
+    assign operand = use_keyboard ? kb_number : alu_input;
 
     alu_ctrl alu_ctrl_inst (
         .clk(clk),
@@ -53,7 +75,7 @@ module alu_top (
         .clk(clk),
         .rst(reset),
         .reg_ctrl(reg_ctrl),
-        .reg_input(alu_input),
+        .reg_input(operand),
         .a(a),
         .b(b)
         );
