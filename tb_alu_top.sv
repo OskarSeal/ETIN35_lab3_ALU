@@ -2,11 +2,9 @@
 
 // Integration testbench for alu_top, using the real debouncers, so each button
 // press must last longer than one debouncer sample period (2^20 cycles = 10.5 ms
-// at 100 MHz). The whole run is about 0.3 s of simulated time:
+// at 100 MHz). The whole run is about 0.25 s of simulated time:
 // in Vivado use "run all" (the default 1000 ns is far too short).
 // The display is read back digit by digit from anode/seven_seg.
-// The operands are first set on the switches, then typed on the keyboard
-// (use_keyboard = SW15), sent as PS/2 frames at 16.7 kHz like a real keyboard.
 module tb_alu_top ();
 
     logic clk;
@@ -14,27 +12,11 @@ module tb_alu_top ();
     logic b_enter;
     logic b_sign;
     logic [7:0] alu_input;
-    logic use_keyboard;
-    logic kb_clk;
-    logic kb_data;
     logic [6:0] seven_seg;
     logic [3:0] anode;
 
     localparam int PERIOD = 10;                 // 100 MHz
     localparam int BUTTON_HOLD = 11_000_000;    // 11 ms, longer than one debouncer sample period
-    localparam int KB_HALF = 30_000;            // half a PS/2 clock period
-
-    // PS/2 set 2 make codes
-    localparam logic [7:0] KEY_1         = 8'h16;
-    localparam logic [7:0] KEY_2         = 8'h1E;
-    localparam logic [7:0] KEY_3         = 8'h26;
-    localparam logic [7:0] KEY_4         = 8'h25;
-    localparam logic [7:0] KEY_5         = 8'h2E;
-    localparam logic [7:0] KEY_6         = 8'h36;
-    localparam logic [7:0] KEY_9         = 8'h46;
-    localparam logic [7:0] KEY_ENTER     = 8'h5A;
-    localparam logic [7:0] KEY_BACKSPACE = 8'h66;
-    localparam logic [7:0] BREAK         = 8'hF0;
 
     // Expected active-low segment patterns (gfedcba)
     localparam logic [6:0] SEG_0     = 7'b1000000;
@@ -57,9 +39,6 @@ module tb_alu_top ();
         .b_enter(b_enter),
         .b_sign(b_sign),
         .alu_input(alu_input),
-        .use_keyboard(use_keyboard),
-        .kb_clk(kb_clk),
-        .kb_data(kb_data),
         .seven_seg(seven_seg),
         .anode(anode)
         );
@@ -94,36 +73,6 @@ module tb_alu_top ();
         end
     endtask
 
-    // One PS/2 frame: start bit (0), 8 data bits LSB first, odd parity, stop
-    // bit (1). Data changes while kb_clk is high and is read on the falling edge.
-    task send_byte;
-        input logic [7:0] code;
-        logic [10:0] frame;
-        begin
-            frame = {1'b1, ~^code, code, 1'b0};
-            repeat (11) begin
-                kb_data = frame[0];
-                #(KB_HALF);
-                kb_clk = 1'b0;
-                #(KB_HALF);
-                kb_clk = 1'b1;
-                frame = frame >> 1;
-            end
-            kb_data = 1'b1;
-            #(4*KB_HALF);
-        end
-    endtask
-
-    // Press and release a key: make code, then F0 + make code
-    task tap_key;
-        input logic [7:0] code;
-        begin
-            send_byte(code);
-            send_byte(BREAK);
-            send_byte(code);
-        end
-    endtask
-
     // Wait for each digit to be enabled in turn and compare its segments.
     // Arguments are given left to right as they appear on the board.
     task check_display;
@@ -154,9 +103,6 @@ module tb_alu_top ();
         b_enter = 1'b0;
         b_sign = 1'b0;
         alu_input = 8'd17;
-        use_keyboard = 1'b0;
-        kb_clk = 1'b1;
-        kb_data = 1'b1;
         press_reset;
 
         // After reset the switches are shown live (unsigned)
@@ -214,36 +160,6 @@ module tb_alu_top ();
         // Signed 127 + 1 overflows: 'F' has priority over '-'
         press_sign;
         check_display(SEG_F, SEG_1, SEG_2, SEG_8, `__LINE__);
-
-        // Keyboard entry: the switches (still 1) are ignored, A starts at 0
-        use_keyboard = 1'b1;
-        press_reset;
-        check_display(SEG_BLANK, SEG_0, SEG_0, SEG_0, `__LINE__);
-
-        // Type A = 123 and latch it with the Enter key
-        tap_key(KEY_1);
-        tap_key(KEY_2);
-        tap_key(KEY_3);
-        check_display(SEG_BLANK, SEG_1, SEG_2, SEG_3, `__LINE__);
-        tap_key(KEY_ENTER);
-
-        // B is typed from scratch: 46, Backspace, 5 -> 45, latched with BTNC
-        check_display(SEG_BLANK, SEG_0, SEG_0, SEG_0, `__LINE__);
-        tap_key(KEY_4);
-        tap_key(KEY_6);
-        tap_key(KEY_BACKSPACE);
-        tap_key(KEY_5);
-        check_display(SEG_BLANK, SEG_0, SEG_4, SEG_5, `__LINE__);
-        press_enter;
-
-        // A + B = 168, and typing has no effect any more
-        check_display(SEG_BLANK, SEG_1, SEG_6, SEG_8, `__LINE__);
-        tap_key(KEY_9);
-        check_display(SEG_BLANK, SEG_1, SEG_6, SEG_8, `__LINE__);
-
-        // The Enter key steps the operation too: A - B = 78
-        tap_key(KEY_ENTER);
-        check_display(SEG_BLANK, SEG_0, SEG_7, SEG_8, `__LINE__);
 
         $display("All tests passed!");
         $finish;
