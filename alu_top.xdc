@@ -44,21 +44,6 @@ set_property PACKAGE_PIN V6 [get_ports {alu_input[6]}]
 set_property PACKAGE_PIN V5 [get_ports {alu_input[7]}]
 	set_property IOSTANDARD LVCMOS33 [get_ports {alu_input[7]}]
 
-## SW15: up = operands typed on the keyboard, down = switches SW0-SW7
-#Bank = 34, Pin name = IO_L14P_T2_SRCC_34,					Sch name = SW15
-set_property PACKAGE_PIN P4 [get_ports use_keyboard]
-	set_property IOSTANDARD LVCMOS33 [get_ports use_keyboard]
-
-## USB HID (PS/2) keyboard, as in lab 2
-#Bank = 35, Pin name = IO_L13P_T2_MRCC_35,					Sch name = PS2_CLK
-set_property PACKAGE_PIN F4 [get_ports kb_clk]
-	set_property IOSTANDARD LVCMOS33 [get_ports kb_clk]
-	set_property PULLUP true [get_ports kb_clk]
-#Bank = 35, Pin name = IO_L10N_T1_AD15N_35,					Sch name = PS2_DATA
-set_property PACKAGE_PIN B2 [get_ports kb_data]
-	set_property IOSTANDARD LVCMOS33 [get_ports kb_data]
-	set_property PULLUP true [get_ports kb_data]
-
 ## 7 segment display
 #Bank = 34, Pin name = IO_L2N_T0_34,						Sch name = CA
 set_property PACKAGE_PIN L3 [get_ports {seven_seg[0]}]

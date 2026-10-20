@@ -8,7 +8,7 @@
                 "shell": { "executable": "powershell.exe", "args": ["-NoProfile", "-Command"] },
                 "env": { "PATH": "D:\\Program\\2026.1\\Vivado\\bin;${env:PATH}" }
             },
-            "command": "$lab2 = 'D:/Program/Vivado/Lund_lab_src/sv'; $src = @('alu_common.sv') + (Get-ChildItem *.sv -Exclude alu_common.sv).Name + ('sync_keyboard.sv', 'edge_detector.sv', 'convert_scancode.sv', 'convert_to_binary.sv' | ForEach-Object { $lab2 + '/' + $_ }); xvlog --sv $src; if ($LASTEXITCODE -eq 0) { xelab ${input:tb} -debug typical -R }",
+            "command": "$src = @('alu_common.sv') + (Get-ChildItem *.sv -Exclude alu_common.sv).Name; xvlog --sv $src; if ($LASTEXITCODE -eq 0) { xelab ${input:tb} -debug typical -R }",
             "problemMatcher": [],
             "group": { "kind": "test", "isDefault": true }
         },
@@ -19,7 +19,7 @@
                 "shell": { "executable": "powershell.exe", "args": ["-NoProfile", "-Command"] },
                 "env": { "PATH": "D:\\Program\\2026.1\\Vivado\\bin;${env:PATH}" }
             },
-            "command": "$lab2 = 'D:/Program/Vivado/Lund_lab_src/sv'; $src = @('alu_common.sv') + (Get-ChildItem *.sv -Exclude alu_common.sv).Name + ('sync_keyboard.sv', 'edge_detector.sv', 'convert_scancode.sv', 'convert_to_binary.sv' | ForEach-Object { $lab2 + '/' + $_ }); xvlog --sv $src; if ($LASTEXITCODE -eq 0) { xelab ${input:tb} -debug typical -s ${input:tb}_sim; xsim ${input:tb}_sim -gui }",
+            "command": "$src = @('alu_common.sv') + (Get-ChildItem *.sv -Exclude alu_common.sv).Name; xvlog --sv $src; if ($LASTEXITCODE -eq 0) { xelab ${input:tb} -debug typical -s ${input:tb}_sim; xsim ${input:tb}_sim -gui }",
             "problemMatcher": []
         }
     ],
@@ -28,7 +28,7 @@
             "id": "tb",
             "type": "pickString",
             "description": "Testbench top module",
-            "options": ["tb_alu", "tb_alu_ctrl", "tb_alu_top", "tb_binary2bcd", "tb_keyboard_input"]
+            "options": ["tb_alu", "tb_alu_ctrl", "tb_alu_top", "tb_binary2bcd"]
         }
     ]
 }
